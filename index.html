@@ -6,6 +6,7 @@
     <title>ConstruMax - Ferretería Industrial y Construcción</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Proxima+Nova:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css">
     <link rel="stylesheet" href="styles/mercadolibre.css">
     
     <script>
@@ -18,7 +19,8 @@
                         'ml-yellow': '#fff159',
                         'ml-gray': '#ebebeb',
                         'ml-dark-gray': '#333333',
-                        'ml-light-gray': '#f5f5f5'
+                        'ml-light-gray': '#f5f5f5',
+                        'ml-green': '#00a650'
                     },
                     fontFamily: {
                         'proxima': ['Proxima Nova', 'sans-serif']
@@ -27,6 +29,36 @@
             }
         }
     </script>
+    
+    <style>
+        .category-card {
+            transition: all 0.3s ease;
+            border: 2px solid transparent;
+        }
+        
+        .category-card:hover {
+            transform: translateY(-5px);
+            border-color: #3483fa;
+            box-shadow: 0 10px 25px rgba(52, 131, 250, 0.15);
+        }
+        
+        .swiper-slide {
+            height: auto;
+        }
+        
+        .promo-badge {
+            position: absolute;
+            top: 12px;
+            left: 12px;
+            background: linear-gradient(135deg, #ff4444, #ff7733);
+            color: white;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 600;
+            z-index: 10;
+        }
+    </style>
 </head>
 <body class="font-proxima bg-ml-light-gray">
     <!-- Header estilo Mercado Libre -->
@@ -74,17 +106,17 @@
                 </nav>
             </div>
             
-            <!-- Segunda fila - Categorías -->
+            <!-- Segunda fila - Categorías principales -->
             <div class="border-t border-gray-200 py-2">
                 <div class="flex items-center space-x-6 text-sm text-ml-dark-gray">
-                    <a href="#" class="hover:text-ml-blue">Herramientas</a>
-                    <a href="#" class="hover:text-ml-blue">Electricidad</a>
-                    <a href="#" class="hover:text-ml-blue">Fontanería</a>
-                    <a href="#" class="hover:text-ml-blue">Construcción</a>
-                    <a href="#" class="hover:text-ml-blue">Seguridad</a>
-                    <a href="#" class="hover:text-ml-blue">Jardín</a>
-                    <a href="#" class="hover:text-ml-blue">Iluminación</a>
-                    <a href="#" class="hover:text-ml-blue">Ofertas</a>
+                    <a href="products.html" class="hover:text-ml-blue font-semibold">Todos los productos</a>
+                    <a href="products.html?category=herramientas" class="hover:text-ml-blue">Herramientas</a>
+                    <a href="products.html?category=electricidad" class="hover:text-ml-blue">Electricidad</a>
+                    <a href="products.html?category=fontaneria" class="hover:text-ml-blue">Fontanería</a>
+                    <a href="products.html?category=construccion" class="hover:text-ml-blue">Construcción</a>
+                    <a href="products.html?category=seguridad" class="hover:text-ml-blue">Seguridad</a>
+                    <a href="products.html?category=jardin" class="hover:text-ml-blue">Jardín</a>
+                    <a href="products.html?category=ofertas" class="hover:text-ml-blue text-ml-green font-semibold">Ofertas</a>
                 </div>
             </div>
         </div>
@@ -93,95 +125,351 @@
     <!-- Banner principal -->
     <section class="bg-white">
         <div class="max-w-7xl mx-auto px-4 py-4">
-            <div class="bg-gradient-to-r from-ml-blue to-ml-dark-blue rounded-lg p-8 text-white">
-                <div class="max-w-md">
+            <div class="bg-gradient-to-r from-ml-blue to-ml-dark-blue rounded-lg p-8 text-white relative overflow-hidden">
+                <div class="max-w-md relative z-10">
                     <h1 class="text-3xl font-bold mb-4">Todo para tu proyecto de construcción</h1>
                     <p class="text-lg mb-6">Herramientas, materiales y equipamiento industrial al mejor precio</p>
-                    <button class="bg-ml-yellow text-ml-dark-gray font-semibold px-6 py-3 rounded-md hover:bg-yellow-400">
-                        Ver productos destacados
-                    </button>
+                    <a href="products.html" class="bg-ml-yellow text-ml-dark-gray font-semibold px-6 py-3 rounded-md hover:bg-yellow-400 inline-block">
+                        Ver todos los productos
+                    </a>
+                </div>
+                <div class="absolute right-0 top-0 bottom-0 w-1/3 bg-gradient-to-l from-ml-blue to-transparent"></div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Categorías destacadas -->
+    <section class="max-w-7xl mx-auto px-4 py-12">
+        <div class="text-center mb-12">
+            <h2 class="text-3xl font-bold text-ml-dark-gray mb-4">Categorías Destacadas</h2>
+            <p class="text-gray-600 max-w-2xl mx-auto">Encuentra todo lo que necesitas para tus proyectos organizado por categorías</p>
+        </div>
+        
+        <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-6">
+            <!-- Herramientas -->
+            <a href="products.html?category=herramientas" class="category-card bg-white rounded-lg shadow-sm border border-gray-200 p-6 text-center hover:no-underline">
+                <div class="w-16 h-16 bg-ml-blue rounded-full flex items-center justify-center mx-auto mb-4">
+                    <span class="text-2xl text-white">🔧</span>
+                </div>
+                <h3 class="font-semibold text-ml-dark-gray mb-2">Herramientas</h3>
+                <p class="text-sm text-gray-600">Profesionales y hogar</p>
+            </a>
+            
+            <!-- Electricidad -->
+            <a href="products.html?category=electricidad" class="category-card bg-white rounded-lg shadow-sm border border-gray-200 p-6 text-center hover:no-underline">
+                <div class="w-16 h-16 bg-ml-green rounded-full flex items-center justify-center mx-auto mb-4">
+                    <span class="text-2xl text-white">⚡</span>
+                </div>
+                <h3 class="font-semibold text-ml-dark-gray mb-2">Electricidad</h3>
+                <p class="text-sm text-gray-600">Cables y componentes</p>
+            </a>
+            
+            <!-- Fontanería -->
+            <a href="products.html?category=fontaneria" class="category-card bg-white rounded-lg shadow-sm border border-gray-200 p-6 text-center hover:no-underline">
+                <div class="w-16 h-16 bg-blue-500 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <span class="text-2xl text-white">🚰</span>
+                </div>
+                <h3 class="font-semibold text-ml-dark-gray mb-2">Fontanería</h3>
+                <p class="text-sm text-gray-600">Tuberías y accesorios</p>
+            </a>
+            
+            <!-- Construcción -->
+            <a href="products.html?category=construccion" class="category-card bg-white rounded-lg shadow-sm border border-gray-200 p-6 text-center hover:no-underline">
+                <div class="w-16 h-16 bg-orange-500 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <span class="text-2xl text-white">🏗️</span>
+                </div>
+                <h3 class="font-semibold text-ml-dark-gray mb-2">Construcción</h3>
+                <p class="text-sm text-gray-600">Materiales básicos</p>
+            </a>
+            
+            <!-- Seguridad -->
+            <a href="products.html?category=seguridad" class="category-card bg-white rounded-lg shadow-sm border border-gray-200 p-6 text-center hover:no-underline">
+                <div class="w-16 h-16 bg-red-500 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <span class="text-2xl text-white">🛡️</span>
+                </div>
+                <h3 class="font-semibold text-ml-dark-gray mb-2">Seguridad</h3>
+                <p class="text-sm text-gray-600">EPP y protección</p>
+            </a>
+            
+            <!-- Jardín -->
+            <a href="products.html?category=jardin" class="category-card bg-white rounded-lg shadow-sm border border-gray-200 p-6 text-center hover:no-underline">
+                <div class="w-16 h-16 bg-green-500 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <span class="text-2xl text-white">🌿</span>
+                </div>
+                <h3 class="font-semibold text-ml-dark-gray mb-2">Jardín</h3>
+                <p class="text-sm text-gray-600">Herramientas y más</p>
+            </a>
+        </div>
+        
+        <div class="text-center mt-8">
+            <a href="products.html" class="bg-ml-blue text-white px-8 py-3 rounded-md font-semibold hover:bg-ml-dark-blue transition-colors inline-flex items-center">
+                Ver todas las categorías
+                <svg class="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                </svg>
+            </a>
+        </div>
+    </section>
+
+    <!-- Carrusel de productos destacados -->
+    <section class="bg-gradient-to-b from-ml-light-gray to-white py-12">
+        <div class="max-w-7xl mx-auto px-4">
+            <div class="flex justify-between items-center mb-8">
+                <div>
+                    <h2 class="text-2xl font-bold text-ml-dark-gray">Productos Destacados</h2>
+                    <p class="text-gray-600">Los productos más vendidos y mejor valorados</p>
+                </div>
+                <a href="products.html" class="text-ml-blue font-semibold hover:underline flex items-center">
+                    Ver todos
+                    <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                    </svg>
+                </a>
+            </div>
+            
+            <!-- Swiper Container -->
+            <div class="swiper featured-swiper">
+                <div class="swiper-wrapper">
+                    <!-- Los productos destacados se cargarán dinámicamente aquí -->
+                </div>
+                
+                <!-- Navigation buttons -->
+                <div class="swiper-button-next"></div>
+                <div class="swiper-button-prev"></div>
+                
+                <!-- Pagination -->
+                <div class="swiper-pagination"></div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Ofertas especiales -->
+    <section class="max-w-7xl mx-auto px-4 py-12">
+        <div class="bg-gradient-to-r from-red-500 to-orange-500 rounded-2xl p-8 text-white relative overflow-hidden">
+            <div class="absolute top-0 right-0 w-1/3 h-full bg-gradient-to-l from-red-500 to-transparent"></div>
+            
+            <div class="relative z-10 max-w-2xl">
+                <span class="bg-white text-red-500 px-4 py-1 rounded-full text-sm font-semibold inline-block mb-4">OFERTA ESPECIAL</span>
+                <h2 class="text-3xl font-bold mb-4">Hasta 40% OFF en herramientas eléctricas</h2>
+                <p class="text-lg mb-6 opacity-90">Aprovecha nuestros descuentos en marcas premium por tiempo limitado</p>
+                <a href="products.html?category=ofertas" class="bg-white text-red-500 font-semibold px-8 py-3 rounded-lg hover:bg-gray-100 transition-colors inline-flex items-center">
+                    Ver ofertas
+                    <svg class="w-5 h-5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                    </svg>
+                </a>
+            </div>
+            
+            <div class="absolute right-8 top-1/2 transform -translate-y-1/2 z-20">
+                <div class="w-32 h-32 bg-white bg-opacity-20 rounded-full flex items-center justify-center">
+                    <span class="text-4xl">⚡</span>
                 </div>
             </div>
         </div>
     </section>
 
-    <!-- Productos destacados -->
-    <section class="max-w-7xl mx-auto px-4 py-8">
-        <div class="flex justify-between items-center mb-6">
-            <h2 class="text-2xl font-semibold text-ml-dark-gray">Productos destacados</h2>
-            <a href="#" class="text-ml-blue font-semibold hover:underline">Ver todos</a>
-        </div>
-        
-        <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
-            <!-- Los productos se cargarán dinámicamente aquí -->
-            <div id="featured-products" class="col-span-full grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
-                <!-- Productos destacados cargados por JavaScript -->
+    <!-- Por qué elegirnos -->
+    <section class="bg-white py-16">
+        <div class="max-w-7xl mx-auto px-4">
+            <div class="text-center mb-12">
+                <h2 class="text-3xl font-bold text-ml-dark-gray mb-4">¿Por qué elegir ConstruMax?</h2>
+                <p class="text-gray-600 max-w-2xl mx-auto">Más de 20 años de experiencia nos respaldan</p>
             </div>
-        </div>
-    </section>
-
-    <!-- Todos los productos -->
-    <section class="max-w-7xl mx-auto px-4 py-8">
-        <div class="flex justify-between items-center mb-6">
-            <h2 class="text-2xl font-semibold text-ml-dark-gray">Todos los productos</h2>
-            <div class="flex items-center space-x-4">
-                <select class="border border-gray-300 rounded-md px-3 py-2 text-sm">
-                    <option>Ordenar por</option>
-                    <option>Menor precio</option>
-                    <option>Mayor precio</option>
-                    <option>Más relevantes</option>
-                </select>
-            </div>
-        </div>
-        
-        <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
-            <div id="products-grid" class="col-span-full">
-                <!-- Productos cargados dinámicamente -->
+            
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <div class="text-center">
+                    <div class="w-20 h-20 bg-ml-blue bg-opacity-10 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <span class="text-3xl text-ml-blue">🚚</span>
+                    </div>
+                    <h3 class="font-semibold text-xl mb-3">Envío Gratis</h3>
+                    <p class="text-gray-600">En compras mayores a $50.000 en todo San Juan</p>
+                </div>
+                
+                <div class="text-center">
+                    <div class="w-20 h-20 bg-ml-green bg-opacity-10 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <span class="text-3xl text-ml-green">🛡️</span>
+                    </div>
+                    <h3 class="font-semibold text-xl mb-3">Garantía Extendida</h3>
+                    <p class="text-gray-600">12 meses de garantía en todos nuestros productos</p>
+                </div>
+                
+                <div class="text-center">
+                    <div class="w-20 h-20 bg-orange-500 bg-opacity-10 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <span class="text-3xl text-orange-500">💬</span>
+                    </div>
+                    <h3 class="font-semibold text-xl mb-3">Asesoría Técnica</h3>
+                    <p class="text-gray-600">Expertos disponibles para resolver tus dudas</p>
+                </div>
             </div>
         </div>
     </section>
 
     <!-- Footer -->
-    <footer class="bg-white border-t border-gray-200 mt-12">
-        <div class="max-w-7xl mx-auto px-4 py-8">
+    <footer class="bg-ml-dark-gray text-white">
+        <div class="max-w-7xl mx-auto px-4 py-12">
             <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
                 <div>
-                    <h3 class="font-semibold text-lg mb-4">ConstruMax</h3>
-                    <p class="text-gray-600 text-sm">Tu ferretería industrial de confianza con los mejores precios y calidad garantizada.</p>
+                    <div class="flex items-center mb-4">
+                        <div class="bg-ml-blue text-white p-2 rounded-lg font-bold text-xl mr-3">
+                            CM
+                        </div>
+                        <span class="text-xl font-bold">ConstruMax</span>
+                    </div>
+                    <p class="text-gray-400 text-sm">Tu ferretería industrial de confianza con los mejores precios y calidad garantizada.</p>
                 </div>
                 <div>
                     <h4 class="font-semibold mb-4">Categorías</h4>
-                    <ul class="space-y-2 text-sm text-gray-600">
-                        <li><a href="#" class="hover:text-ml-blue">Herramientas</a></li>
-                        <li><a href="#" class="hover:text-ml-blue">Materiales</a></li>
-                        <li><a href="#" class="hover:text-ml-blue">Electricidad</a></li>
-                        <li><a href="#" class="hover:text-ml-blue">Fontanería</a></li>
+                    <ul class="space-y-2 text-sm text-gray-400">
+                        <li><a href="products.html?category=herramientas" class="hover:text-white transition-colors">Herramientas</a></li>
+                        <li><a href="products.html?category=electricidad" class="hover:text-white transition-colors">Electricidad</a></li>
+                        <li><a href="products.html?category=fontaneria" class="hover:text-white transition-colors">Fontanería</a></li>
+                        <li><a href="products.html?category=construccion" class="hover:text-white transition-colors">Construcción</a></li>
                     </ul>
                 </div>
                 <div>
                     <h4 class="font-semibold mb-4">Ayuda</h4>
-                    <ul class="space-y-2 text-sm text-gray-600">
-                        <li><a href="#" class="hover:text-ml-blue">Cómo comprar</a></li>
-                        <li><a href="#" class="hover:text-ml-blue">Envíos</a></li>
-                        <li><a href="#" class="hover:text-ml-blue">Devoluciones</a></li>
-                        <li><a href="#" class="hover:text-ml-blue">Contacto</a></li>
+                    <ul class="space-y-2 text-sm text-gray-400">
+                        <li><a href="#" class="hover:text-white transition-colors">Cómo comprar</a></li>
+                        <li><a href="#" class="hover:text-white transition-colors">Envíos</a></li>
+                        <li><a href="#" class="hover:text-white transition-colors">Devoluciones</a></li>
+                        <li><a href="#" class="hover:text-white transition-colors">Contacto</a></li>
                     </ul>
                 </div>
                 <div>
                     <h4 class="font-semibold mb-4">Contacto</h4>
-                    <ul class="space-y-2 text-sm text-gray-600">
-                        <li>📱 264-577-6592</li>
-                        <li>✉️ info@construmax.com</li>
-                        <li>🕒 Lun-Vie: 8:00-18:00</li>
+                    <ul class="space-y-2 text-sm text-gray-400">
+                        <li class="flex items-center">
+                            <span class="w-5 mr-2">📱</span>
+                            264-577-6592
+                        </li>
+                        <li class="flex items-center">
+                            <span class="w-5 mr-2">✉️</span>
+                            info@construmax.com
+                        </li>
+                        <li class="flex items-center">
+                            <span class="w-5 mr-2">🕒</span>
+                            Lun-Vie: 8:00-18:00
+                        </li>
                     </ul>
                 </div>
             </div>
-            <div class="border-t border-gray-200 mt-8 pt-8 text-center text-gray-500 text-sm">
+            <div class="border-t border-gray-700 mt-8 pt-8 text-center text-gray-400 text-sm">
                 <p>&copy; 2025 ConstruMax. Todos los derechos reservados.</p>
             </div>
         </div>
     </footer>
 
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
     <script src="main.js"></script>
+    
+    <script>
+        // Inicializar Swiper cuando el DOM esté listo
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeFeaturedSwiper();
+        });
+
+        function initializeFeaturedSwiper() {
+            const featuredProducts = window.construmaxApp?.products?.filter(product => product.featured && product.stock > 0) || [];
+            const swiperWrapper = document.querySelector('.featured-swiper .swiper-wrapper');
+            
+            if (featuredProducts.length === 0) {
+                swiperWrapper.innerHTML = `
+                    <div class="swiper-slide">
+                        <div class="text-center py-12">
+                            <p class="text-gray-500">No hay productos destacados disponibles</p>
+                        </div>
+                    </div>
+                `;
+                return;
+            }
+
+            // Generar slides para productos destacados
+            swiperWrapper.innerHTML = featuredProducts.map(product => {
+                const imageUrl = product.image || 'resources/placeholder.jpg';
+                const priceFormatted = new Intl.NumberFormat('es-AR', {
+                    style: 'currency',
+                    currency: 'ARS'
+                }).format(product.price);
+
+                const discount = product.featured && Math.random() > 0.7;
+                const discountPercent = discount ? Math.floor(Math.random() * 30) + 10 : 0;
+                const originalPrice = discount ? product.price * (1 + discountPercent/100) : null;
+
+                return `
+                    <div class="swiper-slide">
+                        <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-4 h-full relative">
+                            ${discount ? `<div class="promo-badge">${discountPercent}% OFF</div>` : ''}
+                            <img src="${imageUrl}" alt="${product.name}" 
+                                 class="w-full h-48 object-cover rounded-lg mb-4"
+                                 onerror="this.src='resources/placeholder.jpg'">
+                            <h3 class="font-semibold text-sm mb-2 line-clamp-2">${product.name}</h3>
+                            <p class="text-xs text-gray-500 mb-3 line-clamp-2">${product.description}</p>
+                            
+                            ${discount ? `
+                                <div class="flex items-center space-x-2 mb-2">
+                                    <span class="text-lg font-bold text-ml-dark-gray">${priceFormatted}</span>
+                                    <span class="text-sm text-gray-500 line-through">$${originalPrice.toFixed(2)}</span>
+                                </div>
+                            ` : `
+                                <div class="text-lg font-bold text-ml-dark-gray mb-2">${priceFormatted}</div>
+                            `}
+                            
+                            <div class="text-xs text-ml-green mb-3">Envío gratis</div>
+                            <button 
+                                class="w-full bg-ml-blue text-white py-2 rounded-md text-sm font-semibold hover:bg-ml-dark-blue transition-colors"
+                                onclick="addToCart('${product.id}')"
+                                ${product.stock === 0 ? 'disabled' : ''}
+                            >
+                                ${product.stock === 0 ? 'Sin stock' : 'Agregar al carrito'}
+                            </button>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+
+            // Inicializar Swiper
+            new Swiper('.featured-swiper', {
+                slidesPerView: 1,
+                spaceBetween: 20,
+                navigation: {
+                    nextEl: '.swiper-button-next',
+                    prevEl: '.swiper-button-prev',
+                },
+                pagination: {
+                    el: '.swiper-pagination',
+                    clickable: true,
+                },
+                breakpoints: {
+                    640: {
+                        slidesPerView: 2,
+                    },
+                    768: {
+                        slidesPerView: 3,
+                    },
+                    1024: {
+                        slidesPerView: 4,
+                    },
+                },
+            });
+        }
+
+        // Función toast para esta página
+        function showToast(message, type = 'info') {
+            const toast = document.createElement('div');
+            toast.className = `fixed top-4 right-4 p-4 rounded-md shadow-lg z-50 ${
+                type === 'success' ? 'bg-green-500 text-white' : 
+                type === 'error' ? 'bg-red-500 text-white' : 
+                'bg-blue-500 text-white'
+            }`;
+            toast.textContent = message;
+            
+            document.body.appendChild(toast);
+            
+            setTimeout(() => {
+                toast.remove();
+            }, 3000);
+        }
+    </script>
 </body>
 </html>
