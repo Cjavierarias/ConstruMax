@@ -58,6 +58,18 @@
             font-weight: 600;
             z-index: 10;
         }
+
+        /* Loading states */
+        .skeleton {
+            background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+            background-size: 200% 100%;
+            animation: loading 1.5s infinite;
+        }
+
+        @keyframes loading {
+            0% { background-position: 200% 0; }
+            100% { background-position: -200% 0; }
+        }
     </style>
 </head>
 <body class="font-proxima bg-ml-light-gray">
@@ -68,10 +80,12 @@
             <div class="flex items-center justify-between py-2">
                 <!-- Logo -->
                 <div class="flex items-center">
-                    <div class="bg-ml-blue text-white p-2 rounded-lg font-bold text-xl">
-                        CM
-                    </div>
-                    <span class="ml-3 text-xl font-bold text-ml-dark-gray">ConstruMax</span>
+                    <a href="index.html" class="flex items-center">
+                        <div class="bg-ml-blue text-white p-2 rounded-lg font-bold text-xl">
+                            CM
+                        </div>
+                        <span class="ml-3 text-xl font-bold text-ml-dark-gray">ConstruMax</span>
+                    </a>
                 </div>
                 
                 <!-- Barra de búsqueda -->
@@ -90,10 +104,10 @@
                 
                 <!-- Navegación -->
                 <nav class="flex items-center space-x-6">
-                    <a href="#" class="text-sm text-ml-dark-gray hover:text-ml-blue">
+                    <a href="products.html" class="text-sm text-ml-dark-gray hover:text-ml-blue">
                         <div class="text-center">
-                            <div class="text-lg">📱</div>
-                            <div class="text-xs">Descarga la app</div>
+                            <div class="text-lg">📦</div>
+                            <div class="text-xs">Productos</div>
                         </div>
                     </a>
                     <a href="cart.html" class="text-sm text-ml-dark-gray hover:text-ml-blue relative">
@@ -230,7 +244,34 @@
             <!-- Swiper Container -->
             <div class="swiper featured-swiper">
                 <div class="swiper-wrapper">
-                    <!-- Los productos destacados se cargarán dinámicamente aquí -->
+                    <!-- Loading state -->
+                    <div class="swiper-slide">
+                        <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-4 h-full">
+                            <div class="skeleton w-full h-48 rounded-lg mb-4"></div>
+                            <div class="skeleton h-4 rounded w-3/4 mb-2"></div>
+                            <div class="skeleton h-3 rounded w-full mb-2"></div>
+                            <div class="skeleton h-6 rounded w-1/2 mb-2"></div>
+                            <div class="skeleton h-10 rounded w-full"></div>
+                        </div>
+                    </div>
+                    <div class="swiper-slide">
+                        <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-4 h-full">
+                            <div class="skeleton w-full h-48 rounded-lg mb-4"></div>
+                            <div class="skeleton h-4 rounded w-3/4 mb-2"></div>
+                            <div class="skeleton h-3 rounded w-full mb-2"></div>
+                            <div class="skeleton h-6 rounded w-1/2 mb-2"></div>
+                            <div class="skeleton h-10 rounded w-full"></div>
+                        </div>
+                    </div>
+                    <div class="swiper-slide">
+                        <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-4 h-full">
+                            <div class="skeleton w-full h-48 rounded-lg mb-4"></div>
+                            <div class="skeleton h-4 rounded w-3/4 mb-2"></div>
+                            <div class="skeleton h-3 rounded w-full mb-2"></div>
+                            <div class="skeleton h-6 rounded w-1/2 mb-2"></div>
+                            <div class="skeleton h-10 rounded w-full"></div>
+                        </div>
+                    </div>
                 </div>
                 
                 <!-- Navigation buttons -->
@@ -364,112 +405,31 @@
     <script src="main.js"></script>
     
     <script>
-        // Inicializar Swiper cuando el DOM esté listo
-        document.addEventListener('DOMContentLoaded', function() {
-            initializeFeaturedSwiper();
-        });
-
-        function initializeFeaturedSwiper() {
-            const featuredProducts = window.construmaxApp?.products?.filter(product => product.featured && product.stock > 0) || [];
-            const swiperWrapper = document.querySelector('.featured-swiper .swiper-wrapper');
-            
-            if (featuredProducts.length === 0) {
-                swiperWrapper.innerHTML = `
-                    <div class="swiper-slide">
-                        <div class="text-center py-12">
-                            <p class="text-gray-500">No hay productos destacados disponibles</p>
-                        </div>
-                    </div>
-                `;
-                return;
+        // Botón de debug para desarrollo
+        function addDebugButton() {
+            const header = document.querySelector('header .max-w-7xl');
+            if (header) {
+                const debugBtn = document.createElement('button');
+                debugBtn.className = 'bg-gray-500 text-white px-3 py-1 rounded text-sm ml-4';
+                debugBtn.innerHTML = '🐛 Debug';
+                debugBtn.onclick = function() {
+                    if (window.construmaxApp) {
+                        console.log('🔍 Debug Info:', {
+                            products: window.construmaxApp.products,
+                            featured: window.construmaxApp.products.filter(p => p.featured),
+                            cart: window.construmaxApp.cart
+                        });
+                        alert('Revisa la consola para información de debug');
+                    } else {
+                        alert('App no inicializada');
+                    }
+                };
+                header.querySelector('.flex.items-center').appendChild(debugBtn);
             }
-
-            // Generar slides para productos destacados
-            swiperWrapper.innerHTML = featuredProducts.map(product => {
-                const imageUrl = product.image || 'resources/placeholder.jpg';
-                const priceFormatted = new Intl.NumberFormat('es-AR', {
-                    style: 'currency',
-                    currency: 'ARS'
-                }).format(product.price);
-
-                const discount = product.featured && Math.random() > 0.7;
-                const discountPercent = discount ? Math.floor(Math.random() * 30) + 10 : 0;
-                const originalPrice = discount ? product.price * (1 + discountPercent/100) : null;
-
-                return `
-                    <div class="swiper-slide">
-                        <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-4 h-full relative">
-                            ${discount ? `<div class="promo-badge">${discountPercent}% OFF</div>` : ''}
-                            <img src="${imageUrl}" alt="${product.name}" 
-                                 class="w-full h-48 object-cover rounded-lg mb-4"
-                                 onerror="this.src='resources/placeholder.jpg'">
-                            <h3 class="font-semibold text-sm mb-2 line-clamp-2">${product.name}</h3>
-                            <p class="text-xs text-gray-500 mb-3 line-clamp-2">${product.description}</p>
-                            
-                            ${discount ? `
-                                <div class="flex items-center space-x-2 mb-2">
-                                    <span class="text-lg font-bold text-ml-dark-gray">${priceFormatted}</span>
-                                    <span class="text-sm text-gray-500 line-through">$${originalPrice.toFixed(2)}</span>
-                                </div>
-                            ` : `
-                                <div class="text-lg font-bold text-ml-dark-gray mb-2">${priceFormatted}</div>
-                            `}
-                            
-                            <div class="text-xs text-ml-green mb-3">Envío gratis</div>
-                            <button 
-                                class="w-full bg-ml-blue text-white py-2 rounded-md text-sm font-semibold hover:bg-ml-dark-blue transition-colors"
-                                onclick="addToCart('${product.id}')"
-                                ${product.stock === 0 ? 'disabled' : ''}
-                            >
-                                ${product.stock === 0 ? 'Sin stock' : 'Agregar al carrito'}
-                            </button>
-                        </div>
-                    </div>
-                `;
-            }).join('');
-
-            // Inicializar Swiper
-            new Swiper('.featured-swiper', {
-                slidesPerView: 1,
-                spaceBetween: 20,
-                navigation: {
-                    nextEl: '.swiper-button-next',
-                    prevEl: '.swiper-button-prev',
-                },
-                pagination: {
-                    el: '.swiper-pagination',
-                    clickable: true,
-                },
-                breakpoints: {
-                    640: {
-                        slidesPerView: 2,
-                    },
-                    768: {
-                        slidesPerView: 3,
-                    },
-                    1024: {
-                        slidesPerView: 4,
-                    },
-                },
-            });
         }
 
-        // Función toast para esta página
-        function showToast(message, type = 'info') {
-            const toast = document.createElement('div');
-            toast.className = `fixed top-4 right-4 p-4 rounded-md shadow-lg z-50 ${
-                type === 'success' ? 'bg-green-500 text-white' : 
-                type === 'error' ? 'bg-red-500 text-white' : 
-                'bg-blue-500 text-white'
-            }`;
-            toast.textContent = message;
-            
-            document.body.appendChild(toast);
-            
-            setTimeout(() => {
-                toast.remove();
-            }, 3000);
-        }
+        // Agregar botón de debug después de cargar
+        setTimeout(addDebugButton, 2000);
     </script>
 </body>
 </html>
