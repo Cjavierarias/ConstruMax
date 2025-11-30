@@ -35,45 +35,48 @@ class ConstruMaxApp {
         try {
             console.log('📦 Cargando productos...');
             
-            // Primero cargar productos por defecto inmediatamente
+            // Usar productos por defecto inmediatamente
             this.products = this.getDefaultProducts();
             this.renderFeaturedProducts();
             
-            // Luego intentar cargar desde Google Sheets
-            const WEBAPP_URL = 'https://script.google.com/macros/s/AKfycbw5JtLIQU5j-fj8fNO3iNfOQ3RO3pqmZMP2qFZ1RwpWl_4ZcyLIsNYQf_AgWEGx3I38/exec';
-            
-            const response = await fetch(WEBAPP_URL);
-            
-            if (response.ok) {
-                const data = await response.json();
+            // Intentar cargar desde Google Sheets (opcional)
+            try {
+                const WEBAPP_URL = 'https://script.google.com/macros/s/AKfycbw5JtLIQU5j-fj8fNO3iNfOQ3RO3pqmZMP2qFZ1RwpWl_4ZcyLIsNYQf_AgWEGx3I38/exec';
+                const response = await fetch(WEBAPP_URL);
                 
-                if (data.products && Array.isArray(data.products)) {
-                    this.products = data.products.map(product => ({
-                        id: product.id || product.ID_Producto || Math.random().toString(36).substr(2, 9),
-                        name: product.name || product.Nombre || 'Producto sin nombre',
-                        category: product.category || product.Categoría_Principal || 'herramientas',
-                        allCategories: Array.isArray(product.allCategories) ? product.allCategories : 
-                                      (product.Todas_Categorías ? 
-                                       (typeof product.Todas_Categorías === 'string' ? 
-                                        product.Todas_Categorías.split(',').map(cat => cat.trim()) : 
-                                        [product.Todas_Categorías]) : 
-                                       [product.Categoría_Principal]),
-                        featured: product.featured || product.Destacado === 'SI',
-                        price: Number(product.price || product.Precio) || 0,
-                        stock: Number(product.stock || product.Stock) || 0,
-                        image: product.image || product['Imagen URL'] || this.getRandomToolImage(),
-                        description: product.description || product.Descripción || 'Descripción no disponible',
-                        code: product.code || product.Código || 'SN',
-                        active: product.active !== undefined ? product.active : true
-                    })).filter(product => product.active);
+                if (response.ok) {
+                    const data = await response.json();
+                    
+                    if (data.products && Array.isArray(data.products)) {
+                        this.products = data.products.map(product => ({
+                            id: product.id || product.ID_Producto || Math.random().toString(36).substr(2, 9),
+                            name: product.name || product.Nombre || 'Producto sin nombre',
+                            category: product.category || product.Categoría_Principal || 'herramientas',
+                            allCategories: Array.isArray(product.allCategories) ? product.allCategories : 
+                                          (product.Todas_Categorías ? 
+                                           (typeof product.Todas_Categorías === 'string' ? 
+                                            product.Todas_Categorías.split(',').map(cat => cat.trim()) : 
+                                            [product.Todas_Categorías]) : 
+                                           [product.Categoría_Principal]),
+                            featured: product.featured || product.Destacado === 'SI',
+                            price: Number(product.price || product.Precio) || 0,
+                            stock: Number(product.stock || product.Stock) || 0,
+                            image: product.image || product['Imagen URL'] || this.getRandomToolImage(),
+                            description: product.description || product.Descripción || 'Descripción no disponible',
+                            code: product.code || product.Código || 'SN',
+                            active: product.active !== undefined ? product.active : true
+                        })).filter(product => product.active);
 
-                    console.log('✅ Productos cargados desde Sheet:', this.products.length);
-                    this.renderFeaturedProducts();
+                        console.log('✅ Productos cargados desde Sheet:', this.products.length);
+                        this.renderFeaturedProducts();
+                    }
                 }
+            } catch (sheetError) {
+                console.log('📋 Usando productos locales:', sheetError);
             }
             
         } catch (error) {
-            console.log('⚠️ Error cargando productos, usando datos locales:', error);
+            console.log('⚠️ Error general, usando datos locales:', error);
             this.products = this.getDefaultProducts();
             this.renderFeaturedProducts();
         }
@@ -145,6 +148,19 @@ class ConstruMaxApp {
                 description: 'Pintura látex premium para interiores 20L',
                 code: 'PTL-20',
                 active: true
+            },
+            {
+                id: 'cable-003',
+                name: 'Cable Eléctrico 2.5mm',
+                category: 'electricidad',
+                allCategories: ['electricidad'],
+                featured: false,
+                price: 8999,
+                stock: 50,
+                image: 'https://images.unsplash.com/photo-1581093458791-8a6a5d49414a?w=400&h=300&fit=crop',
+                description: 'Cable eléctrico THHN 2.5mm x 100m',
+                code: 'CBL-250',
+                active: true
             }
         ];
     }
@@ -163,7 +179,6 @@ class ConstruMaxApp {
         
         console.log('⭐ Productos destacados encontrados:', featuredProducts.length);
 
-        // Para el carrusel Swiper
         const swiperWrapper = document.querySelector('.featured-swiper .swiper-wrapper');
         if (swiperWrapper) {
             this.renderSwiperProducts(featuredProducts, swiperWrapper);
@@ -176,7 +191,7 @@ class ConstruMaxApp {
             wrapper.innerHTML = `
                 <div class="swiper-slide">
                     <div class="text-center py-8">
-                        <p class="text-gray-500">No hay productos destacados</p>
+                        <p class="text-gray-500">No hay productos destacados disponibles</p>
                     </div>
                 </div>
             `;
@@ -186,7 +201,7 @@ class ConstruMaxApp {
         wrapper.innerHTML = products.map(product => `
             <div class="swiper-slide">
                 <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-4 h-full relative">
-                    <div class="promo-badge">Destacado</div>
+                    <div class="promo-badge">⭐ Destacado</div>
                     <img src="${product.image}" alt="${product.name}" 
                          class="w-full h-48 object-cover rounded-lg mb-4"
                          onerror="this.src='${this.getRandomToolImage()}'">
@@ -195,19 +210,19 @@ class ConstruMaxApp {
                     <div class="text-lg font-bold text-ml-dark-gray mb-2">
                         $${product.price.toLocaleString('es-AR')}
                     </div>
-                    <div class="text-xs text-ml-green mb-3">Envío gratis</div>
+                    <div class="text-xs text-ml-green mb-3">🚚 Envío gratis</div>
                     <button 
                         class="w-full bg-ml-blue text-white py-2 rounded-md text-sm font-semibold hover:bg-ml-dark-blue transition-colors add-to-cart-btn"
                         data-product-id="${product.id}"
                         ${product.stock === 0 ? 'disabled' : ''}
                     >
-                        ${product.stock === 0 ? 'Sin stock' : 'Agregar al carrito'}
+                        ${product.stock === 0 ? '❌ Sin stock' : '🛒 Agregar al carrito'}
                     </button>
                 </div>
             </div>
         `).join('');
 
-        // Agregar event listeners a los botones
+        // Agregar event listeners
         document.querySelectorAll('.add-to-cart-btn').forEach(btn => {
             btn.addEventListener('click', (e) => {
                 const productId = e.target.dataset.productId;
@@ -235,18 +250,9 @@ class ConstruMaxApp {
                     clickable: true,
                 },
                 breakpoints: {
-                    640: { 
-                        slidesPerView: 2,
-                        spaceBetween: 20
-                    },
-                    768: { 
-                        slidesPerView: 3,
-                        spaceBetween: 20
-                    },
-                    1024: { 
-                        slidesPerView: 4,
-                        spaceBetween: 20
-                    },
+                    640: { slidesPerView: 2 },
+                    768: { slidesPerView: 3 },
+                    1024: { slidesPerView: 4 },
                 },
             });
             console.log('✅ Swiper inicializado correctamente');
@@ -255,7 +261,6 @@ class ConstruMaxApp {
         }
     }
 
-    // Métodos del carrito
     addToCart(productId, quantity = 1) {
         const product = this.products.find(p => p.id === productId);
         if (!product) {
@@ -263,18 +268,9 @@ class ConstruMaxApp {
             return false;
         }
 
-        if (product.stock < quantity) {
-            this.showToast(`Stock insuficiente. Solo quedan ${product.stock} unidades`, 'error');
-            return false;
-        }
-
         const existingItem = this.cart.find(item => item.productId === productId);
         
         if (existingItem) {
-            if (existingItem.quantity + quantity > product.stock) {
-                this.showToast(`No puedes agregar más. Stock máximo: ${product.stock}`, 'error');
-                return false;
-            }
             existingItem.quantity += quantity;
         } else {
             this.cart.push({
@@ -288,40 +284,8 @@ class ConstruMaxApp {
 
         this.saveCart();
         this.updateCartUI();
-        this.showToast(`${product.name} agregado al carrito`, 'success');
+        this.showToast(`✅ ${product.name} agregado al carrito`, 'success');
         return true;
-    }
-
-    removeFromCart(productId) {
-        this.cart = this.cart.filter(item => item.productId !== productId);
-        this.saveCart();
-        this.updateCartUI();
-        this.showToast('Producto eliminado del carrito', 'success');
-    }
-
-    updateQuantity(productId, quantity) {
-        const product = this.products.find(p => p.id === productId);
-        const item = this.cart.find(item => item.productId === productId);
-        
-        if (item && product) {
-            if (quantity <= 0) {
-                this.removeFromCart(productId);
-            } else if (quantity > product.stock) {
-                this.showToast(`No puedes agregar más. Stock máximo: ${product.stock}`, 'error');
-            } else {
-                item.quantity = quantity;
-                this.saveCart();
-                this.updateCartUI();
-            }
-        }
-    }
-
-    getCartTotal() {
-        return this.cart.reduce((total, item) => total + (item.price * item.quantity), 0);
-    }
-
-    getCartItemCount() {
-        return this.cart.reduce((total, item) => total + item.quantity, 0);
     }
 
     saveCart() {
@@ -331,14 +295,13 @@ class ConstruMaxApp {
     updateCartUI() {
         const cartCount = document.getElementById('cart-count');
         if (cartCount) {
-            const count = this.getCartItemCount();
+            const count = this.cart.reduce((total, item) => total + item.quantity, 0);
             cartCount.textContent = count;
             cartCount.style.display = count > 0 ? 'flex' : 'none';
         }
     }
 
     showToast(message, type = 'info') {
-        // Eliminar toasts existentes
         document.querySelectorAll('.custom-toast').forEach(toast => toast.remove());
         
         const toast = document.createElement('div');
@@ -359,22 +322,15 @@ class ConstruMaxApp {
     }
 }
 
-// Inicializar la aplicación cuando el DOM esté listo
-if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', initializeApp);
-} else {
-    initializeApp();
-}
-
-function initializeApp() {
-    console.log('🚀 Inicializando ConstruMax App...');
+// Inicializar la aplicación
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('📄 DOM cargado - Inicializando app...');
     window.construmaxApp = new ConstruMaxApp();
-}
+});
 
-// Función global para recargar productos
+// Función global para recargar
 function refreshProducts() {
     if (window.construmaxApp) {
         window.construmaxApp.loadProducts();
-        window.construmaxApp.showToast('Productos actualizados', 'success');
     }
 }
