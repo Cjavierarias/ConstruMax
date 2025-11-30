@@ -27,6 +27,18 @@ class ConstruMaxApp {
     async init() {
         await this.loadProductsFromSheet();
         this.updateCartUI();
+
+         // Solo generar productos destacados si estamos en index.html
+        if (window.location.pathname.includes('index.html') || window.location.pathname === '/') {
+            this.generateFeaturedProducts();
+        }
+        
+        // Solo generar todos los productos si estamos en products.html
+        if (window.location.pathname.includes('products.html')) {
+            this.generateAllProducts();
+        }
+
+        
         this.generateFeaturedProducts();
         this.generateAllProducts();
         this.bindEvents();
@@ -173,7 +185,7 @@ class ConstruMaxApp {
         }).join('');
     }
 
-    generateAllProducts() {
+    /* generateAllProducts() {
         const productsGrid = document.getElementById('products-grid');
         if (!productsGrid) return;
 
@@ -219,6 +231,16 @@ class ConstruMaxApp {
                 </div>
             `;
         }).join('');
+    } */
+
+    // Nuevo método para products.html
+generateAllProducts() {
+    const productsGrid = document.getElementById('products-grid');
+    if (!productsGrid) return;
+
+    if (this.products.length === 0) {
+        productsGrid.innerHTML = '<p class="text-gray-500 text-center col-span-full">No hay productos disponibles</p>';
+        return;
     }
 
     addToCart(productId, quantity = 1) {
@@ -352,3 +374,4 @@ function removeFromCart(productId) {
 function updateQuantity(productId, quantity) {
     window.construmaxApp.updateQuantity(productId, parseInt(quantity));
 }
+
