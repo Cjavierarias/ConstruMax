@@ -6,6 +6,13 @@
     overflow: hidden;
 }
 
+.line-clamp-3 {
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
 /* Animaciones suaves */
 .transition-all {
     transition: all 0.3s ease;
@@ -93,22 +100,25 @@
     box-shadow: 0 0 0 1px #3483fa;
 }
 
-/* Responsive improvements */
-@media (max-width: 768px) {
-    .product-grid {
-        grid-template-columns: repeat(2, 1fr);
-        gap: 1rem;
-    }
-    
-    .header-content {
-        flex-direction: column;
-        gap: 1rem;
-    }
-    
-    .header-search {
-        order: 2;
-        width: 100%;
-    }
+/* Swiper personalización */
+.swiper-button-next,
+.swiper-button-prev {
+    color: #3483fa !important;
+    background: white;
+    width: 40px !important;
+    height: 40px !important;
+    border-radius: 50%;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+}
+
+.swiper-button-next:after,
+.swiper-button-prev:after {
+    font-size: 18px !important;
+    font-weight: bold;
+}
+
+.swiper-pagination-bullet-active {
+    background: #3483fa !important;
 }
 
 /* Loading states */
@@ -125,4 +135,95 @@
     100% {
         background-position: -200% 0;
     }
+}
+
+/* Toast personalizado */
+.custom-toast {
+    animation: slideIn 0.3s ease;
+}
+
+@keyframes slideIn {
+    from {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+/* Promo badge */
+.promo-badge {
+    position: absolute;
+    top: 12px;
+    left: 12px;
+    background: linear-gradient(135deg, #ff4444, #ff7733);
+    color: white;
+    padding: 4px 12px;
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: 600;
+    z-index: 10;
+}
+
+/* Category cards */
+.category-card {
+    transition: all 0.3s ease;
+    border: 2px solid transparent;
+}
+
+.category-card:hover {
+    transform: translateY(-5px);
+    border-color: #3483fa;
+    box-shadow: 0 10px 25px rgba(52, 131, 250, 0.15);
+}
+
+/* Responsive improvements */
+@media (max-width: 768px) {
+    .product-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 1rem;
+    }
+    
+    .header-content {
+        flex-direction: column;
+        gap: 1rem;
+    }
+    
+    .header-search {
+        order: 2;
+        width: 100%;
+    }
+
+    .swiper-button-next,
+    .swiper-button-prev {
+        display: none !important;
+    }
+}
+
+/* Mejoras de accesibilidad */
+@media (prefers-reduced-motion: reduce) {
+    .transition-all,
+    .product-card,
+    .category-card {
+        transition: none;
+    }
+    
+    .skeleton {
+        animation: none;
+    }
+}
+
+/* Focus styles para accesibilidad */
+button:focus,
+input:focus,
+select:focus {
+    outline: 2px solid #3483fa;
+    outline-offset: 2px;
+}
+
+/* Mejoras de rendimiento */
+img {
+    content-visibility: auto;
 }
