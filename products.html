@@ -1,0 +1,675 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Todos los Productos - ConstruMax</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Proxima+Nova:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css">
+    <link rel="stylesheet" href="styles/mercadolibre.css">
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'ml-blue': '#3483fa',
+                        'ml-dark-blue': '#2968c8',
+                        'ml-yellow': '#fff159',
+                        'ml-gray': '#ebebeb',
+                        'ml-dark-gray': '#333333',
+                        'ml-light-gray': '#f5f5f5',
+                        'ml-green': '#00a650'
+                    },
+                    fontFamily: {
+                        'proxima': ['Proxima Nova', 'sans-serif']
+                    }
+                }
+            }
+        }
+    </script>
+    
+    <style>
+        .filter-sidebar {
+            transition: all 0.3s ease;
+        }
+        
+        .category-filter {
+            transition: all 0.2s ease;
+        }
+        
+        .category-filter:hover,
+        .category-filter.active {
+            background: #3483fa;
+            color: white;
+        }
+        
+        .promo-slide {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 12px;
+            overflow: hidden;
+        }
+        
+        .stock-badge {
+            position: absolute;
+            top: 12px;
+            right: 12px;
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: 600;
+            z-index: 10;
+        }
+        
+        .stock-high {
+            background: #d4edda;
+            color: #155724;
+        }
+        
+        .stock-medium {
+            background: #fff3cd;
+            color: #856404;
+        }
+        
+        .stock-low {
+            background: #f8d7da;
+            color: #721c24;
+        }
+        
+        @media (max-width: 768px) {
+            .filter-sidebar {
+                position: fixed;
+                top: 0;
+                left: -100%;
+                width: 80%;
+                height: 100vh;
+                z-index: 50;
+                background: white;
+                padding: 20px;
+                overflow-y: auto;
+            }
+            
+            .filter-sidebar.active {
+                left: 0;
+            }
+            
+            .filter-overlay {
+                display: none;
+                position: fixed;
+                top: 0;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                background: rgba(0,0,0,0.5);
+                z-index: 40;
+            }
+            
+            .filter-overlay.active {
+                display: block;
+            }
+        }
+    </style>
+</head>
+<body class="font-proxima bg-ml-light-gray">
+    <!-- Header -->
+    <header class="bg-ml-yellow shadow-sm">
+        <div class="max-w-7xl mx-auto px-4">
+            <div class="flex items-center justify-between py-2">
+                <div class="flex items-center">
+                    <div class="bg-ml-blue text-white p-2 rounded-lg font-bold text-xl">
+                        CM
+                    </div>
+                    <span class="ml-3 text-xl font-bold text-ml-dark-gray">ConstruMax</span>
+                </div>
+                
+                <!-- Barra de búsqueda -->
+                <div class="flex-1 max-w-2xl mx-8">
+                    <div class="relative">
+                        <input 
+                            type="text" 
+                            id="search-products"
+                            placeholder="Buscar productos, marcas y más..."
+                            class="w-full px-4 py-2 rounded-md border border-gray-300 focus:outline-none focus:border-ml-blue"
+                        >
+                        <button class="absolute right-0 top-0 bg-ml-gray h-full px-4 rounded-r-md hover:bg-gray-300">
+                            🔍
+                        </button>
+                    </div>
+                </div>
+                
+                <nav class="flex items-center space-x-6">
+                    <a href="index.html" class="text-sm text-ml-dark-gray hover:text-ml-blue">Inicio</a>
+                    <a href="cart.html" class="text-sm text-ml-dark-gray hover:text-ml-blue relative">
+                        <div class="text-center">
+                            <div class="text-lg">🛒</div>
+                            <div class="text-xs">Carrito</div>
+                            <span id="cart-count" class="absolute -top-1 -right-1 bg-ml-blue text-white text-xs rounded-full w-5 h-5 flex items-center justify-center hidden">0</span>
+                        </div>
+                    </a>
+                </nav>
+            </div>
+        </div>
+    </header>
+
+    <!-- Breadcrumb -->
+    <div class="bg-white border-b border-gray-200">
+        <div class="max-w-7xl mx-auto px-4 py-3">
+            <nav class="flex items-center space-x-2 text-sm text-gray-600">
+                <a href="index.html" class="hover:text-ml-blue">Inicio</a>
+                <span>></span>
+                <span class="text-ml-dark-gray font-semibold" id="breadcrumb-category">Todos los productos</span>
+            </nav>
+        </div>
+    </div>
+
+    <main class="max-w-7xl mx-auto px-4 py-8">
+        <!-- Carrusel de promociones -->
+        <div class="mb-8">
+            <div class="swiper promo-swiper rounded-xl overflow-hidden">
+                <div class="swiper-wrapper">
+                    <div class="swiper-slide">
+                        <div class="promo-slide text-white p-8">
+                            <div class="max-w-md">
+                                <span class="bg-white text-purple-600 px-4 py-1 rounded-full text-sm font-semibold inline-block mb-4">OFERTA ESPECIAL</span>
+                                <h2 class="text-3xl font-bold mb-4">Hasta 40% OFF en herramientas</h2>
+                                <p class="text-lg mb-6 opacity-90">Aprovecha los descuentos en marcas premium</p>
+                                <button class="bg-white text-purple-600 font-semibold px-6 py-2 rounded-lg hover:bg-gray-100 transition-colors">
+                                    Ver ofertas
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="swiper-slide">
+                        <div class="bg-gradient-to-r from-green-500 to-ml-green text-white p-8">
+                            <div class="max-w-md">
+                                <span class="bg-white text-green-600 px-4 py-1 rounded-full text-sm font-semibold inline-block mb-4">ENVÍO GRATIS</span>
+                                <h2 class="text-3xl font-bold mb-4">Envío gratis en compras mayores a $50.000</h2>
+                                <p class="text-lg mb-6 opacity-90">Aprovecha esta promoción por tiempo limitado</p>
+                                <button class="bg-white text-green-600 font-semibold px-6 py-2 rounded-lg hover:bg-gray-100 transition-colors">
+                                    Ver productos
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="swiper-slide">
+                        <div class="bg-gradient-to-r from-orange-500 to-red-500 text-white p-8">
+                            <div class="max-w-md">
+                                <span class="bg-white text-orange-600 px-4 py-1 rounded-full text-sm font-semibold inline-block mb-4">NUEVO</span>
+                                <h2 class="text-3xl font-bold mb-4">Nuevas herramientas profesionales</h2>
+                                <p class="text-lg mb-6 opacity-90">Descubre nuestra nueva línea de herramientas</p>
+                                <button class="bg-white text-orange-600 font-semibold px-6 py-2 rounded-lg hover:bg-gray-100 transition-colors">
+                                    Ver novedades
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="swiper-pagination"></div>
+            </div>
+        </div>
+
+        <div class="flex flex-col lg:flex-row gap-8">
+            <!-- Filtros Sidebar -->
+            <div class="lg:w-1/4">
+                <div class="filter-sidebar bg-white rounded-lg shadow-sm border border-gray-200 p-6 sticky top-4">
+                    <div class="flex justify-between items-center mb-6 lg:block">
+                        <h3 class="text-lg font-semibold">Filtros</h3>
+                        <button class="lg:hidden text-gray-500" onclick="closeFilters()">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                            </svg>
+                        </button>
+                    </div>
+                    
+                    <!-- Categorías -->
+                    <div class="mb-6">
+                        <h4 class="font-semibold mb-3">Categorías</h4>
+                        <div class="space-y-2">
+                            <button class="category-filter w-full text-left px-3 py-2 rounded-md text-sm" data-category="todos">
+                                Todos los productos
+                            </button>
+                            <button class="category-filter w-full text-left px-3 py-2 rounded-md text-sm" data-category="herramientas">
+                                Herramientas
+                            </button>
+                            <button class="category-filter w-full text-left px-3 py-2 rounded-md text-sm" data-category="electricidad">
+                                Electricidad
+                            </button>
+                            <button class="category-filter w-full text-left px-3 py-2 rounded-md text-sm" data-category="fontaneria">
+                                Fontanería
+                            </button>
+                            <button class="category-filter w-full text-left px-3 py-2 rounded-md text-sm" data-category="construccion">
+                                Construcción
+                            </button>
+                            <button class="category-filter w-full text-left px-3 py-2 rounded-md text-sm" data-category="seguridad">
+                                Seguridad
+                            </button>
+                            <button class="category-filter w-full text-left px-3 py-2 rounded-md text-sm" data-category="jardin">
+                                Jardín
+                            </button>
+                            <button class="category-filter w-full text-left px-3 py-2 rounded-md text-sm bg-ml-green text-white" data-category="ofertas">
+                                🏷️ Ofertas especiales
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- Precio -->
+                    <div class="mb-6">
+                        <h4 class="font-semibold mb-3">Precio</h4>
+                        <div class="space-y-2">
+                            <div class="flex items-center">
+                                <input type="radio" id="price-all" name="price" class="mr-2" checked>
+                                <label for="price-all" class="text-sm">Todos los precios</label>
+                            </div>
+                            <div class="flex items-center">
+                                <input type="radio" id="price-low" name="price" class="mr-2">
+                                <label for="price-low" class="text-sm">Hasta $10.000</label>
+                            </div>
+                            <div class="flex items-center">
+                                <input type="radio" id="price-medium" name="price" class="mr-2">
+                                <label for="price-medium" class="text-sm">$10.000 - $50.000</label>
+                            </div>
+                            <div class="flex items-center">
+                                <input type="radio" id="price-high" name="price" class="mr-2">
+                                <label for="price-high" class="text-sm">Más de $50.000</label>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Stock -->
+                    <div class="mb-6">
+                        <h4 class="font-semibold mb-3">Disponibilidad</h4>
+                        <div class="space-y-2">
+                            <div class="flex items-center">
+                                <input type="checkbox" id="stock-available" class="mr-2" checked>
+                                <label for="stock-available" class="text-sm">En stock</label>
+                            </div>
+                            <div class="flex items-center">
+                                <input type="checkbox" id="stock-low" class="mr-2">
+                                <label for="stock-low" class="text-sm">Poco stock</label>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <button class="w-full bg-ml-blue text-white py-2 rounded-md font-semibold hover:bg-ml-dark-blue transition-colors">
+                        Aplicar filtros
+                    </button>
+                </div>
+                
+                <!-- Overlay para móviles -->
+                <div class="filter-overlay" onclick="closeFilters()"></div>
+            </div>
+            
+            <!-- Contenido principal -->
+            <div class="lg:w-3/4">
+                <!-- Header de productos -->
+                <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-6">
+                    <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between">
+                        <div>
+                            <h1 class="text-2xl font-semibold text-ml-dark-gray mb-2" id="page-title">Todos los productos</h1>
+                            <p class="text-gray-600" id="product-count">Cargando productos...</p>
+                        </div>
+                        
+                        <div class="flex items-center space-x-4 mt-4 lg:mt-0">
+                            <button class="lg:hidden bg-ml-blue text-white px-4 py-2 rounded-md text-sm font-semibold" onclick="openFilters()">
+                                Filtros
+                            </button>
+                            
+                            <select class="border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:border-ml-blue">
+                                <option>Ordenar por: Más relevantes</option>
+                                <option>Menor precio</option>
+                                <option>Mayor precio</option>
+                                <option>Mejor valorados</option>
+                                <option>Más vendidos</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Grid de productos -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6" id="products-grid">
+                    <!-- Los productos se cargarán dinámicamente aquí -->
+                    <div class="col-span-full text-center py-12">
+                        <div class="animate-pulse">
+                            <div class="h-6 bg-gray-200 rounded w-48 mx-auto mb-4"></div>
+                            <div class="h-4 bg-gray-200 rounded w-64 mx-auto mb-6"></div>
+                            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                                <div class="bg-gray-200 rounded-lg h-80"></div>
+                                <div class="bg-gray-200 rounded-lg h-80"></div>
+                                <div class="bg-gray-200 rounded-lg h-80"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Paginación -->
+                <div class="flex justify-center mt-12">
+                    <nav class="flex items-center space-x-2">
+                        <button class="px-3 py-2 rounded border border-gray-300 text-gray-500 hover:bg-gray-50">
+                            Anterior
+                        </button>
+                        <button class="px-3 py-2 rounded border border-ml-blue bg-ml-blue text-white">
+                            1
+                        </button>
+                        <button class="px-3 py-2 rounded border border-gray-300 text-gray-700 hover:bg-gray-50">
+                            2
+                        </button>
+                        <button class="px-3 py-2 rounded border border-gray-300 text-gray-700 hover:bg-gray-50">
+                            3
+                        </button>
+                        <span class="px-3 py-2 text-gray-500">...</span>
+                        <button class="px-3 py-2 rounded border border-gray-300 text-gray-700 hover:bg-gray-50">
+                            10
+                        </button>
+                        <button class="px-3 py-2 rounded border border-gray-300 text-gray-700 hover:bg-gray-50">
+                            Siguiente
+                        </button>
+                    </nav>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-ml-dark-gray text-white mt-16">
+        <div class="max-w-7xl mx-auto px-4 py-12">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
+                <div>
+                    <div class="flex items-center mb-4">
+                        <div class="bg-ml-blue text-white p-2 rounded-lg font-bold text-xl mr-3">
+                            CM
+                        </div>
+                        <span class="text-xl font-bold">ConstruMax</span>
+                    </div>
+                    <p class="text-gray-400 text-sm">Tu ferretería industrial de confianza con los mejores precios y calidad garantizada.</p>
+                </div>
+                <div>
+                    <h4 class="font-semibold mb-4">Categorías</h4>
+                    <ul class="space-y-2 text-sm text-gray-400">
+                        <li><a href="products.html?category=herramientas" class="hover:text-white transition-colors">Herramientas</a></li>
+                        <li><a href="products.html?category=electricidad" class="hover:text-white transition-colors">Electricidad</a></li>
+                        <li><a href="products.html?category=fontaneria" class="hover:text-white transition-colors">Fontanería</a></li>
+                        <li><a href="products.html?category=construccion" class="hover:text-white transition-colors">Construcción</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="font-semibold mb-4">Ayuda</h4>
+                    <ul class="space-y-2 text-sm text-gray-400">
+                        <li><a href="#" class="hover:text-white transition-colors">Cómo comprar</a></li>
+                        <li><a href="#" class="hover:text-white transition-colors">Envíos</a></li>
+                        <li><a href="#" class="hover:text-white transition-colors">Devoluciones</a></li>
+                        <li><a href="#" class="hover:text-white transition-colors">Contacto</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="font-semibold mb-4">Contacto</h4>
+                    <ul class="space-y-2 text-sm text-gray-400">
+                        <li class="flex items-center">
+                            <span class="w-5 mr-2">📱</span>
+                            264-577-6592
+                        </li>
+                        <li class="flex items-center">
+                            <span class="w-5 mr-2">✉️</span>
+                            info@construmax.com
+                        </li>
+                        <li class="flex items-center">
+                            <span class="w-5 mr-2">🕒</span>
+                            Lun-Vie: 8:00-18:00
+                        </li>
+                    </ul>
+                </div>
+            </div>
+            <div class="border-t border-gray-700 mt-8 pt-8 text-center text-gray-400 text-sm">
+                <p>&copy; 2025 ConstruMax. Todos los derechos reservados.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
+    <script src="main.js"></script>
+    
+    <script>
+        let currentCategory = 'todos';
+        let allProducts = [];
+        
+        document.addEventListener('DOMContentLoaded', function() {
+            initializePromoSwiper();
+            loadProducts();
+            bindCategoryFilters();
+            bindSearch();
+            
+            // Verificar si hay una categoría en la URL
+            const urlParams = new URLSearchParams(window.location.search);
+            const categoryParam = urlParams.get('category');
+            if (categoryParam) {
+                filterByCategory(categoryParam);
+            }
+        });
+        
+        function initializePromoSwiper() {
+            new Swiper('.promo-swiper', {
+                slidesPerView: 1,
+                spaceBetween: 0,
+                loop: true,
+                autoplay: {
+                    delay: 5000,
+                },
+                pagination: {
+                    el: '.swiper-pagination',
+                    clickable: true,
+                },
+            });
+        }
+        
+        function loadProducts() {
+            allProducts = window.construmaxApp?.products || [];
+            displayProducts(allProducts);
+        }
+        
+        function displayProducts(products) {
+            const productsGrid = document.getElementById('products-grid');
+            const productCount = document.getElementById('product-count');
+            
+            if (!products || products.length === 0) {
+                productsGrid.innerHTML = `
+                    <div class="col-span-full text-center py-12">
+                        <div class="text-gray-500">
+                            <svg class="w-16 h-16 mx-auto mb-4 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                            </svg>
+                            <h3 class="text-xl font-semibold mb-2">No se encontraron productos</h3>
+                            <p>Intenta con otros filtros o términos de búsqueda</p>
+                        </div>
+                    </div>
+                `;
+                productCount.textContent = '0 productos encontrados';
+                return;
+            }
+            
+            productCount.textContent = `${products.length} producto${products.length !== 1 ? 's' : ''} encontrado${products.length !== 1 ? 's' : ''}`;
+            
+            productsGrid.innerHTML = products.map(product => {
+                const imageUrl = product.image || 'resources/placeholder.jpg';
+                const priceFormatted = new Intl.NumberFormat('es-AR', {
+                    style: 'currency',
+                    currency: 'ARS'
+                }).format(product.price);
+                
+                const stockClass = product.stock > 10 ? 'stock-high' : 
+                                 product.stock > 0 ? 'stock-medium' : 'stock-low';
+                const stockText = product.stock > 10 ? 'Disponible' : 
+                                product.stock > 0 ? 'Poco stock' : 'Agotado';
+                
+                const isOnSale = Math.random() > 0.7 && product.stock > 0;
+                const discountPercent = isOnSale ? Math.floor(Math.random() * 30) + 10 : 0;
+                const originalPrice = isOnSale ? product.price * (1 + discountPercent/100) : null;
+                
+                return `
+                    <div class="bg-white rounded-lg shadow-sm border border-gray-200 hover:shadow-md transition-shadow relative">
+                        ${isOnSale ? `<div class="absolute top-3 left-3 bg-red-500 text-white px-2 py-1 rounded text-xs font-semibold z-10">${discountPercent}% OFF</div>` : ''}
+                        <div class="stock-badge ${stockClass}">${stockText}</div>
+                        
+                        <img src="${imageUrl}" alt="${product.name}" 
+                             class="w-full h-48 object-cover rounded-t-lg"
+                             onerror="this.src='resources/placeholder.jpg'">
+                        
+                        <div class="p-4">
+                            <h3 class="font-semibold text-sm mb-2 line-clamp-2">${product.name}</h3>
+                            <p class="text-xs text-gray-500 mb-3 line-clamp-2">${product.description}</p>
+                            
+                            <div class="flex items-center justify-between mb-2">
+                                <span class="text-xs text-gray-500">Código: ${product.code}</span>
+                                <span class="text-xs text-gray-500">Stock: ${product.stock}</span>
+                            </div>
+                            
+                            ${isOnSale ? `
+                                <div class="flex items-center space-x-2 mb-2">
+                                    <span class="text-lg font-bold text-ml-dark-gray">${priceFormatted}</span>
+                                    <span class="text-sm text-gray-500 line-through">$${originalPrice.toFixed(2)}</span>
+                                </div>
+                            ` : `
+                                <div class="text-lg font-bold text-ml-dark-gray mb-2">${priceFormatted}</div>
+                            `}
+                            
+                            <div class="text-xs text-ml-green mb-3">Envío gratis</div>
+                            
+                            <button 
+                                class="w-full bg-ml-blue text-white py-2 rounded-md text-sm font-semibold hover:bg-ml-dark-blue transition-colors disabled:bg-gray-300 disabled:cursor-not-allowed"
+                                onclick="addToCart('${product.id}')"
+                                ${product.stock === 0 ? 'disabled' : ''}
+                            >
+                                ${product.stock === 0 ? 'Sin stock' : 'Agregar al carrito'}
+                            </button>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+        
+        function bindCategoryFilters() {
+            document.querySelectorAll('.category-filter').forEach(button => {
+                button.addEventListener('click', function() {
+                    const category = this.dataset.category;
+                    filterByCategory(category);
+                    
+                    // Cerrar filtros en móviles
+                    closeFilters();
+                });
+            });
+        }
+        
+        function filterByCategory(category) {
+            currentCategory = category;
+            
+            // Actualizar botones activos
+            document.querySelectorAll('.category-filter').forEach(button => {
+                button.classList.remove('active', 'bg-ml-blue', 'text-white');
+            });
+            
+            const activeButton = document.querySelector(`[data-category="${category}"]`);
+            if (activeButton) {
+                activeButton.classList.add('active', 'bg-ml-blue', 'text-white');
+            }
+            
+            // Actualizar breadcrumb y título
+            const categoryNames = {
+                'todos': 'Todos los productos',
+                'herramientas': 'Herramientas',
+                'electricidad': 'Electricidad',
+                'fontaneria': 'Fontanería',
+                'construccion': 'Construcción',
+                'seguridad': 'Seguridad',
+                'jardin': 'Jardín',
+                'ofertas': 'Ofertas especiales'
+            };
+            
+            document.getElementById('breadcrumb-category').textContent = categoryNames[category] || category;
+            document.getElementById('page-title').textContent = categoryNames[category] || category;
+            
+            // Filtrar productos
+            let filteredProducts = allProducts;
+            
+            if (category !== 'todos') {
+                if (category === 'ofertas') {
+                    // Simular productos en oferta
+                    filteredProducts = allProducts.filter(product => 
+                        product.stock > 0 && Math.random() > 0.5
+                    );
+                } else {
+                    filteredProducts = allProducts.filter(product => 
+                        product.allCategories.includes(category) && product.stock > 0
+                    );
+                }
+            }
+            
+            displayProducts(filteredProducts);
+        }
+        
+        function bindSearch() {
+            const searchInput = document.getElementById('search-products');
+            if (searchInput) {
+                searchInput.addEventListener('input', function(e) {
+                    const searchTerm = e.target.value.toLowerCase().trim();
+                    searchProducts(searchTerm);
+                });
+            }
+        }
+        
+        function searchProducts(searchTerm) {
+            let filteredProducts = allProducts;
+            
+            if (currentCategory !== 'todos') {
+                if (currentCategory === 'ofertas') {
+                    filteredProducts = allProducts.filter(product => 
+                        product.stock > 0 && Math.random() > 0.5
+                    );
+                } else {
+                    filteredProducts = allProducts.filter(product => 
+                        product.allCategories.includes(currentCategory) && product.stock > 0
+                    );
+                }
+            }
+            
+            if (searchTerm) {
+                filteredProducts = filteredProducts.filter(product => 
+                    product.name.toLowerCase().includes(searchTerm) ||
+                    product.description.toLowerCase().includes(searchTerm) ||
+                    product.code.toLowerCase().includes(searchTerm)
+                );
+            }
+            
+            displayProducts(filteredProducts);
+        }
+        
+        function openFilters() {
+            document.querySelector('.filter-sidebar').classList.add('active');
+            document.querySelector('.filter-overlay').classList.add('active');
+            document.body.style.overflow = 'hidden';
+        }
+        
+        function closeFilters() {
+            document.querySelector('.filter-sidebar').classList.remove('active');
+            document.querySelector('.filter-overlay').classList.remove('active');
+            document.body.style.overflow = '';
+        }
+        
+        // Función toast
+        function showToast(message, type = 'info') {
+            const toast = document.createElement('div');
+            toast.className = `fixed top-4 right-4 p-4 rounded-md shadow-lg z-50 ${
+                type === 'success' ? 'bg-green-500 text-white' : 
+                type === 'error' ? 'bg-red-500 text-white' : 
+                'bg-blue-500 text-white'
+            }`;
+            toast.textContent = message;
+            
+            document.body.appendChild(toast);
+            
+            setTimeout(() => {
+                toast.remove();
+            }, 3000);
+        }
+    </script>
+</body>
+</html>
