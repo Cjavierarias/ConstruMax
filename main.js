@@ -25,54 +25,38 @@ class ConstruMaxApp {
     }
 
     async init() {
+        console.log('🚀 Iniciando ConstruMax App...');
         await this.loadProductsFromSheet();
         this.updateCartUI();
-
-        // Solo generar productos destacados si estamos en index.html
-        const currentPath = window.location.pathname;
-        const isIndexPage = currentPath.includes('index.html') || currentPath === '/' || currentPath.endsWith('/');
-        const isProductsPage = currentPath.includes('products.html');
-
-        console.log('🔄 Inicializando página:', { currentPath, isIndexPage, isProductsPage });
-
-        if (isIndexPage) {
-            console.log('🏠 Página de inicio - Generando productos destacados');
-            this.generateFeaturedProducts();
-        }
-        
-        if (isProductsPage) {
-            console.log('📦 Página de productos - Lista completa');
-            // La generación de productos en products.html se maneja en su propio script
-        }
-
+        this.setupPage();
         this.bindEvents();
     }
 
     async loadProductsFromSheet() {
         try {
-            console.log('🔄 Cargando productos desde Google Sheet...');
+            console.log('📦 Cargando productos...');
             
+            // Primero cargar productos por defecto inmediatamente
+            this.products = this.getDefaultProducts();
+            
+            // Luego intentar cargar desde Google Sheets
             const WEBAPP_URL = 'https://script.google.com/macros/s/AKfycbw5JtLIQU5j-fj8fNO3iNfOQ3RO3pqmZMP2qFZ1RwpWl_4ZcyLIsNYQf_AgWEGx3I38/exec';
             
             const response = await fetch(WEBAPP_URL);
             
-            if (!response.ok) {
-                throw new Error(`Error HTTP: ${response.status}`);
-            }
-            
-            const data = await response.json();
-            
-            if (data.products && Array.isArray(data.products)) {
-                this.products = data.products.map(product => {
-                    const processedProduct = {
+            if (response.ok) {
+                const data = await response.json();
+                
+                if (data.products && Array.isArray(data.products)) {
+                    this.products = data.products.map(product => ({
                         id: product.id || product.ID_Producto || '',
                         name: product.name || product.Nombre || '',
                         category: product.category || product.Categoría_Principal || '',
-                        allCategories: product.allCategories || 
+                        allCategories: Array.isArray(product.allCategories) ? product.allCategories : 
                                       (product.Todas_Categorías ? 
                                        (typeof product.Todas_Categorías === 'string' ? 
                                         product.Todas_Categorías.split(',').map(cat => cat.trim()) : 
-                                        product.Todas_Categorías) : 
+                                        [product.Todas_Categorías]) : 
                                        [product.Categoría_Principal]),
                         featured: product.featured || product.Destacado === 'SI',
                         price: Number(product.price || product.Precio) || 0,
@@ -80,30 +64,20 @@ class ConstruMaxApp {
                         image: product.image || product['Imagen URL'] || 'resources/placeholder.jpg',
                         description: product.description || product.Descripción || '',
                         code: product.code || product.Código || '',
-                        active: product.active !== undefined ? product.active : 
-                               (product.Activo === 'SI' || product.Activo === true || product.Activo === '')
-                    };
+                        active: product.active !== undefined ? product.active : true
+                    })).filter(product => product.active);
 
-                    if (!Array.isArray(processedProduct.allCategories)) {
-                        processedProduct.allCategories = [processedProduct.category];
-                    }
-
-                    return processedProduct;
-                }).filter(product => product.active);
-
-                console.log(`✅ ${this.products.length} productos cargados desde Sheet`);
-                console.log('📊 Productos destacados:', this.products.filter(p => p.featured).length);
-                
-            } else {
-                console.error('❌ Formato de respuesta inválido:', data);
-                this.products = this.getDefaultProducts();
+                    console.log('✅ Productos cargados desde Sheet:', this.products.length);
+                }
             }
             
         } catch (error) {
-            console.error('❌ Error cargando productos:', error);
+            console.log('⚠️ Usando productos por defecto:', error);
             this.products = this.getDefaultProducts();
-            console.log('🔄 Usando productos por defecto');
         }
+
+        console.log('📊 Total de productos:', this.products.length);
+        console.log('⭐ Productos destacados:', this.products.filter(p => p.featured).length);
     }
 
     getDefaultProducts() {
@@ -116,21 +90,21 @@ class ConstruMaxApp {
                 featured: true,
                 price: 25999,
                 stock: 15,
-                image: 'resources/taladro.jpg',
+                image: 'https://images.unsplash.com/photo-1572981779307-38f8b0456222?w=300',
                 description: 'Taladro percutor profesional con 650W de potencia',
                 code: 'TLD-650',
                 active: true
             },
             {
                 id: 'martillo-002',
-                name: 'Martillo Demoledor',
+                name: 'Martillo Demoledor 1500W',
                 category: 'herramientas',
                 allCategories: ['herramientas', 'construccion'],
                 featured: true,
                 price: 45999,
                 stock: 8,
-                image: 'resources/martillo.jpg',
-                description: 'Martillo demoledor 1500W para trabajos pesados',
+                image: 'https://images.unsplash.com/photo-1581093458791-8a6a5d49414a?w=300',
+                description: 'Martillo demoledor profesional para trabajos pesados',
                 code: 'MRT-D1500',
                 active: true
             },
@@ -142,7 +116,7 @@ class ConstruMaxApp {
                 featured: false,
                 price: 8999,
                 stock: 50,
-                image: 'resources/cable.jpg',
+                image: 'https://images.unsplash.com/photo-1581093458791-8a6a5d49414a?w=300',
                 description: 'Cable eléctrico THHN 2.5mm x 100m',
                 code: 'CBL-250',
                 active: true
@@ -155,7 +129,7 @@ class ConstruMaxApp {
                 featured: true,
                 price: 32999,
                 stock: 12,
-                image: 'resources/sierra.jpg',
+                image: 'https://images.unsplash.com/photo-1572981779307-38f8b0456222?w=300',
                 description: 'Sierra circular profesional con láser guía',
                 code: 'SRC-1800',
                 active: true
@@ -168,118 +142,158 @@ class ConstruMaxApp {
                 featured: true,
                 price: 15999,
                 stock: 25,
-                image: 'resources/pintura.jpg',
+                image: 'https://images.unsplash.com/photo-1581093458791-8a6a5d49414a?w=300',
                 description: 'Pintura látex premium para interiores 20L',
                 code: 'PTL-20',
+                active: true
+            },
+            {
+                id: 'destornillador-006',
+                name: 'Juego Destornilladores',
+                category: 'herramientas',
+                allCategories: ['herramientas'],
+                featured: false,
+                price: 12999,
+                stock: 30,
+                image: 'https://images.unsplash.com/photo-1572981779307-38f8b0456222?w=300',
+                description: 'Set de 12 destornilladores profesionales',
+                code: 'DST-12',
                 active: true
             }
         ];
     }
 
-    generateFeaturedProducts() {
-        const featuredContainer = document.getElementById('featured-products');
-        if (!featuredContainer) {
-            console.log('❌ No se encontró el contenedor de productos destacados');
-            return;
-        }
-
-        const featuredProducts = this.products.filter(product => product.featured && product.stock > 0);
+    setupPage() {
+        const path = window.location.pathname;
         
-        console.log('🎯 Productos destacados encontrados:', featuredProducts.length);
-        
-        if (featuredProducts.length === 0) {
-            featuredContainer.innerHTML = '<p class="text-gray-500 text-center col-span-full">No hay productos destacados</p>';
-            return;
-        }
-
-        // Para el index.html con Swiper
-        if (document.querySelector('.featured-swiper')) {
-            this.generateFeaturedSwiper(featuredProducts);
-        } else {
-            // Para grid normal (fallback)
-            featuredContainer.innerHTML = featuredProducts.map(product => {
-                const imageUrl = product.image || 'resources/placeholder.jpg';
-                const priceFormatted = new Intl.NumberFormat('es-AR', {
-                    style: 'currency',
-                    currency: 'ARS'
-                }).format(product.price);
-
-                return `
-                    <div class="bg-white rounded-lg shadow-sm border border-gray-200 hover:shadow-md transition-shadow">
-                        <img src="${imageUrl}" alt="${product.name}" 
-                             class="w-full h-32 object-cover rounded-t-lg"
-                             onerror="this.src='resources/placeholder.jpg'">
-                        <div class="p-3">
-                            <h3 class="font-semibold text-sm mb-2 line-clamp-2">${product.name}</h3>
-                            <div class="text-lg font-bold text-ml-dark-gray">${priceFormatted}</div>
-                            <div class="text-xs text-green-600 mb-2">Envío gratis</div>
-                            <button 
-                                class="w-full bg-ml-blue text-white py-2 rounded-md text-sm font-semibold hover:bg-ml-dark-blue transition-colors"
-                                onclick="addToCart('${product.id}')"
-                                ${product.stock === 0 ? 'disabled' : ''}
-                            >
-                                ${product.stock === 0 ? 'Sin stock' : 'Agregar al carrito'}
-                            </button>
-                        </div>
-                    </div>
-                `;
-            }).join('');
+        if (path.includes('index.html') || path === '/' || path.endsWith('/')) {
+            this.setupHomePage();
+        } else if (path.includes('products.html')) {
+            this.setupProductsPage();
         }
     }
 
-    generateFeaturedSwiper(featuredProducts) {
+    setupHomePage() {
+        console.log('🏠 Configurando página de inicio');
+        this.generateFeaturedProducts();
+    }
+
+    setupProductsPage() {
+        console.log('📦 Configurando página de productos');
+        // La página products.html maneja su propia lógica
+    }
+
+    generateFeaturedProducts() {
+        console.log('🎯 Generando productos destacados...');
+        
+        const featuredProducts = this.products.filter(product => 
+            product.featured && product.stock > 0
+        );
+        
+        console.log('⭐ Productos destacados encontrados:', featuredProducts.length);
+
+        // Para el carrusel Swiper
         const swiperWrapper = document.querySelector('.featured-swiper .swiper-wrapper');
-        if (!swiperWrapper) {
-            console.log('❌ No se encontró el swiper wrapper');
-            return;
+        if (swiperWrapper) {
+            this.generateSwiperProducts(featuredProducts, swiperWrapper);
         }
 
-        swiperWrapper.innerHTML = featuredProducts.map(product => {
-            const imageUrl = product.image || 'resources/placeholder.jpg';
-            const priceFormatted = new Intl.NumberFormat('es-AR', {
-                style: 'currency',
-                currency: 'ARS'
-            }).format(product.price);
+        // Para grid normal (fallback)
+        const featuredContainer = document.getElementById('featured-products');
+        if (featuredContainer && !swiperWrapper) {
+            this.generateGridProducts(featuredProducts, featuredContainer);
+        }
+    }
 
-            const discount = product.featured && Math.random() > 0.7;
-            const discountPercent = discount ? Math.floor(Math.random() * 30) + 10 : 0;
-            const originalPrice = discount ? product.price * (1 + discountPercent/100) : null;
-
-            return `
+    generateSwiperProducts(products, wrapper) {
+        if (products.length === 0) {
+            wrapper.innerHTML = `
                 <div class="swiper-slide">
-                    <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-4 h-full relative">
-                        ${discount ? `<div class="promo-badge">${discountPercent}% OFF</div>` : ''}
-                        <img src="${imageUrl}" alt="${product.name}" 
-                             class="w-full h-48 object-cover rounded-lg mb-4"
-                             onerror="this.src='resources/placeholder.jpg'">
-                        <h3 class="font-semibold text-sm mb-2 line-clamp-2">${product.name}</h3>
-                        <p class="text-xs text-gray-500 mb-3 line-clamp-2">${product.description}</p>
-                        
-                        ${discount ? `
-                            <div class="flex items-center space-x-2 mb-2">
-                                <span class="text-lg font-bold text-ml-dark-gray">${priceFormatted}</span>
-                                <span class="text-sm text-gray-500 line-through">$${originalPrice.toFixed(2)}</span>
-                            </div>
-                        ` : `
-                            <div class="text-lg font-bold text-ml-dark-gray mb-2">${priceFormatted}</div>
-                        `}
-                        
-                        <div class="text-xs text-ml-green mb-3">Envío gratis</div>
-                        <button 
-                            class="w-full bg-ml-blue text-white py-2 rounded-md text-sm font-semibold hover:bg-ml-dark-blue transition-colors"
-                            onclick="addToCart('${product.id}')"
-                            ${product.stock === 0 ? 'disabled' : ''}
-                        >
-                            ${product.stock === 0 ? 'Sin stock' : 'Agregar al carrito'}
-                        </button>
+                    <div class="text-center py-8">
+                        <p class="text-gray-500">No hay productos destacados</p>
                     </div>
                 </div>
             `;
-        }).join('');
+            return;
+        }
 
-        console.log('✅ Swiper de productos destacados generado');
+        wrapper.innerHTML = products.map(product => `
+            <div class="swiper-slide">
+                <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-4 h-full relative">
+                    <div class="promo-badge">Destacado</div>
+                    <img src="${product.image}" alt="${product.name}" 
+                         class="w-full h-48 object-cover rounded-lg mb-4"
+                         onerror="this.src='resources/placeholder.jpg'">
+                    <h3 class="font-semibold text-sm mb-2 line-clamp-2">${product.name}</h3>
+                    <p class="text-xs text-gray-500 mb-3 line-clamp-2">${product.description}</p>
+                    <div class="text-lg font-bold text-ml-dark-gray mb-2">
+                        $${product.price.toLocaleString('es-AR')}
+                    </div>
+                    <div class="text-xs text-ml-green mb-3">Envío gratis</div>
+                    <button 
+                        class="w-full bg-ml-blue text-white py-2 rounded-md text-sm font-semibold hover:bg-ml-dark-blue transition-colors"
+                        onclick="addToCart('${product.id}')"
+                        ${product.stock === 0 ? 'disabled' : ''}
+                    >
+                        ${product.stock === 0 ? 'Sin stock' : 'Agregar al carrito'}
+                    </button>
+                </div>
+            </div>
+        `).join('');
+
+        // Inicializar Swiper si existe
+        if (typeof Swiper !== 'undefined') {
+            new Swiper('.featured-swiper', {
+                slidesPerView: 1,
+                spaceBetween: 20,
+                navigation: {
+                    nextEl: '.swiper-button-next',
+                    prevEl: '.swiper-button-prev',
+                },
+                pagination: {
+                    el: '.swiper-pagination',
+                    clickable: true,
+                },
+                breakpoints: {
+                    640: { slidesPerView: 2 },
+                    768: { slidesPerView: 3 },
+                    1024: { slidesPerView: 4 },
+                },
+            });
+        }
     }
 
+    generateGridProducts(products, container) {
+        if (products.length === 0) {
+            container.innerHTML = '<p class="text-gray-500 text-center col-span-full">No hay productos destacados</p>';
+            return;
+        }
+
+        container.innerHTML = products.map(product => `
+            <div class="bg-white rounded-lg shadow-sm border border-gray-200 hover:shadow-md transition-shadow">
+                <img src="${product.image}" alt="${product.name}" 
+                     class="w-full h-48 object-cover rounded-t-lg"
+                     onerror="this.src='resources/placeholder.jpg'">
+                <div class="p-4">
+                    <h3 class="font-semibold text-sm mb-2">${product.name}</h3>
+                    <p class="text-xs text-gray-500 mb-2">${product.description}</p>
+                    <div class="text-lg font-bold text-ml-dark-gray mb-2">
+                        $${product.price.toLocaleString('es-AR')}
+                    </div>
+                    <div class="text-xs text-ml-green mb-3">Envío gratis</div>
+                    <button 
+                        class="w-full bg-ml-blue text-white py-2 rounded-md text-sm font-semibold hover:bg-ml-dark-blue transition-colors"
+                        onclick="addToCart('${product.id}')"
+                        ${product.stock === 0 ? 'disabled' : ''}
+                    >
+                        ${product.stock === 0 ? 'Sin stock' : 'Agregar al carrito'}
+                    </button>
+                </div>
+            </div>
+        `).join('');
+    }
+
+    // Métodos del carrito
     addToCart(productId, quantity = 1) {
         const product = this.products.find(p => p.id === productId);
         if (!product) {
@@ -304,7 +318,9 @@ class ConstruMaxApp {
             this.cart.push({
                 productId: productId,
                 quantity: quantity,
-                price: product.price
+                price: product.price,
+                name: product.name,
+                image: product.image
             });
         }
 
@@ -339,10 +355,7 @@ class ConstruMaxApp {
     }
 
     getCartTotal() {
-        return this.cart.reduce((total, item) => {
-            const product = this.products.find(p => p.id === item.productId);
-            return total + (product ? product.price * item.quantity : 0);
-        }, 0);
+        return this.cart.reduce((total, item) => total + (item.price * item.quantity), 0);
     }
 
     getCartItemCount() {
@@ -363,7 +376,6 @@ class ConstruMaxApp {
     }
 
     showToast(message, type = 'info') {
-        // Implementación mejorada de toast
         const toast = document.createElement('div');
         toast.className = `fixed top-4 right-4 p-4 rounded-md shadow-lg z-50 ${
             type === 'success' ? 'bg-green-500 text-white' : 
@@ -375,14 +387,14 @@ class ConstruMaxApp {
         document.body.appendChild(toast);
         
         setTimeout(() => {
-            toast.remove();
+            if (toast.parentNode) {
+                toast.parentNode.removeChild(toast);
+            }
         }, 3000);
-        
-        console.log(`${type.toUpperCase()}: ${message}`);
     }
 
     bindEvents() {
-        // Eventos de búsqueda y filtros
+        // Búsqueda en tiempo real
         const searchInput = document.querySelector('input[type="text"]');
         if (searchInput) {
             searchInput.addEventListener('input', (e) => {
@@ -392,8 +404,7 @@ class ConstruMaxApp {
     }
 
     filterProducts(searchTerm) {
-        // Implementación básica de filtrado
-        const products = document.querySelectorAll('#products-grid > div');
+        const products = document.querySelectorAll('.product-card');
         const term = searchTerm.toLowerCase();
         
         products.forEach(product => {
@@ -408,12 +419,11 @@ class ConstruMaxApp {
         });
     }
 
-    // Método para obtener productos para products.html
+    // Métodos de utilidad
     getAllProducts() {
         return this.products;
     }
 
-    // Método para obtener productos por categoría
     getProductsByCategory(category) {
         if (category === 'todos') {
             return this.products;
@@ -425,17 +435,49 @@ class ConstruMaxApp {
 }
 
 // Inicializar la aplicación
-document.addEventListener('DOMContentLoaded', () => {
-    console.log('🚀 Inicializando ConstruMax App...');
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('📄 DOM cargado - Inicializando app...');
     window.construmaxApp = new ConstruMaxApp();
 });
 
-// Funciones globales
+// Funciones globales para HTML
 function addToCart(productId) {
     if (window.construmaxApp) {
         window.construmaxApp.addToCart(productId);
     } else {
-        console.error('❌ ConstruMax App no está inicializada');
+        console.error('❌ App no inicializada');
+        // Fallback: agregar directamente al localStorage
+        const cart = JSON.parse(localStorage.getItem('construmax_cart')) || [];
+        const existing = cart.find(item => item.productId === productId);
+        
+        if (existing) {
+            existing.quantity += 1;
+        } else {
+            cart.push({
+                productId: productId,
+                quantity: 1,
+                price: 0,
+                name: 'Producto',
+                image: 'resources/placeholder.jpg'
+            });
+        }
+        
+        localStorage.setItem('construmax_cart', JSON.stringify(cart));
+        
+        // Actualizar UI
+        const cartCount = document.getElementById('cart-count');
+        if (cartCount) {
+            const count = cart.reduce((total, item) => total + item.quantity, 0);
+            cartCount.textContent = count;
+            cartCount.style.display = count > 0 ? 'flex' : 'none';
+        }
+        
+        // Mostrar toast
+        const toast = document.createElement('div');
+        toast.className = 'fixed top-4 right-4 p-4 rounded-md shadow-lg z-50 bg-green-500 text-white';
+        toast.textContent = 'Producto agregado al carrito';
+        document.body.appendChild(toast);
+        setTimeout(() => toast.remove(), 3000);
     }
 }
 
@@ -451,17 +493,11 @@ function updateQuantity(productId, quantity) {
     }
 }
 
-// Función global para recargar productos
+// Función para recargar productos
 function refreshProducts() {
     if (window.construmaxApp) {
         window.construmaxApp.loadProductsFromSheet().then(() => {
-            const currentPath = window.location.pathname;
-            const isIndexPage = currentPath.includes('index.html') || currentPath === '/' || currentPath.endsWith('/');
-            
-            if (isIndexPage) {
-                window.construmaxApp.generateFeaturedProducts();
-            }
-            
+            window.construmaxApp.setupPage();
             window.construmaxApp.showToast('Productos actualizados', 'success');
         });
     }
